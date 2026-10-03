@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Find your college swim program{% endblock %}
+{% block body_class %}page-home{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="hero__lanes" aria-hidden="true"></div>
+  <div class="container hero__grid">
+    <div class="hero__copy">
+      <p class="eyebrow eyebrow--light">College recruiting, by the clock</p>
+      <h1>Find the program where your times fit.</h1>
+      <p class="lead">
+        You're more than one number. SwimMatch compares every event you swim against each
+        program's recruiting standards, so you can build a realistic, ambitious college list.
+      </p>
+      <div class="hero__actions">
+        <a class="btn btn-accent btn-lg" href="{{ url_for('pages.profile') }}">Enter your times</a>
+        <a class="btn btn-ghost btn-lg" href="{{ url_for('pages.schools') }}">Browse {{ school_count }} programs</a>
+      </div>
+      <ul class="hero__stats">
+        <li><strong>8</strong><span>events compared</span></li>
+        <li><strong>SCY</strong><span>short-course yards</span></li>
+        <li><strong>D1–NAIA</strong><span>every division</span></li>
+      </ul>
+    </div>
+
+    <div class="hero__preview" aria-label="Example match preview">
+      <div class="preview-card">
+        <div class="preview-card__head">
+          <div>
+            <p class="preview-card__kicker">Sample match</p>
+            <p class="preview-card__title">Carolina Pines College</p>
+          </div>
+          <div class="match-badge match-badge--lg">
+            <span class="match-badge__value">78<small>%</small></span>
+            <span class="match-badge__label">Match</span>
+          </div>
+        </div>
+        <ul class="lane-list">
+          <li><span>50 Free</span><span class="lane-bar"><i style="width: 92%"></i></span><b>21.10</b></li>
+          <li><span>100 Free</span><span class="lane-bar"><i style="width: 86%"></i></span><b>46.20</b></li>
+          <li><span>200 IM</span><span class="lane-bar"><i style="width: 74%"></i></span><b>1:53.60</b></li>
+          <li><span>100 Fly</span><span class="lane-bar"><i style="width: 68%"></i></span><b>50.20</b></li>
+        </ul>
+        <p class="preview-card__foot">Illustrative only — scoring is in development.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how-it-works" class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="eyebrow">How it works</p>
+      <h2>Three steps to a smarter college list</h2>
+    </div>
+    <ol class="steps">
+      <li class="card step">
+        <span class="step__num">01</span>
+        <h3>Build your swimmer profile</h3>
+        <p>Add your best short-course yards times across freestyle, stroke and IM events, plus academics and preferences.</p>
+      </li>
+      <li class="card step">
+        <span class="step__num">02</span>
+        <h3>Compare event by event</h3>
+        <p>We line up each of your times against every program's recruit and walk-on standards — not a single rating.</p>
+      </li>
+      <li class="card step">
+        <span class="step__num">03</span>
+        <h3>Shortlist with confidence</h3>
+        <p>See where you'd contribute right away, where you're close, and which programs are reaches worth emailing.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="section section--tint">
+  <div class="container">
+    <div class="section-head section-head--row">
+      <div>
+        <p class="eyebrow">Featured programs</p>
+        <h2>Start exploring</h2>
+      </div>
+      <a class="btn btn-outline" href="{{ url_for('pages.schools') }}">See all programs</a>
+    </div>
+    <div class="card-grid">
+      {% for r in featured %}
+        {% with school=r.school, score=r.score %}{% include "_school_card.html" %}{% endwith %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="cta-band">
+      <div>
+        <h2>Your times tell a story. Let's read it right.</h2>
+        <p>Set up your profile in a few minutes — no account needed for this draft.</p>
+      </div>
+      <a class="btn btn-accent btn-lg" href="{{ url_for('pages.profile') }}">Go to my profile</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

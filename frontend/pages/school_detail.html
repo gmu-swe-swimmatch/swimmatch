@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}{{ school.name }}{% endblock %}
+
+{% block content %}
+<section class="page-header page-header--school">
+  <div class="container">
+    <a class="back-link" href="{{ url_for('pages.schools') }}">&larr; All programs</a>
+    <div class="school-hero">
+      <div class="monogram monogram--lg" style="--mono: {{ school.primary_color }}">{{ school.short_name }}</div>
+      <div>
+        <h1>{{ school.name }}</h1>
+        <p class="lead">{{ school.location }} · {{ school.conference }}</p>
+        <div class="pill-row">
+          <span class="pill pill--accent">{{ school.division }}</span>
+          <span class="pill pill--light">{{ school.pool }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <div class="stat-row">
+      <div class="card stat"><span class="stat__value">{{ '{:,}'.format(school.enrollment) }}</span><span class="stat__label">Undergrads</span></div>
+      <div class="card stat"><span class="stat__value">{{ '%.2f'|format(school.avg_gpa) }}</span><span class="stat__label">Avg admitted GPA</span></div>
+      <div class="card stat"><span class="stat__value">{{ (school.acceptance_rate * 100)|round|int }}%</span><span class="stat__label">Acceptance rate</span></div>
+      <div class="card stat"><span class="stat__value">{{ school.roster_size }}</span><span class="stat__label">Roster size</span></div>
+    </div>
+
+    <div class="detail-layout">
+      <div class="card">
+        <div class="card__head">
+          <h2>Recruiting standards</h2>
+          <span class="pill">SCY · men's</span>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col">Event</th>
+                <th scope="col" class="num">Your time</th>
+                <th scope="col" class="num">Recruit</th>
+                <th scope="col" class="num">Walk-on</th>
+                <th scope="col" class="num">Gap to recruit</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in rows %}
+                <tr>
+                  <th scope="row">{{ row.label }}</th>
+                  <td class="num"><strong>{{ row.mine|swimtime }}</strong></td>
+                  <td class="num">{{ row.standard.recruit_time|swimtime if row.standard else '—' }}</td>
+                  <td class="num">{{ row.standard.walkon_time|swimtime if row.standard else '—' }}</td>
+                  <td class="num">
+                    {% if row.gap is none %}—
+                    {% else %}<span class="gap {{ 'gap--under' if row.gap <= 0 else 'gap--over' }}">{{ row.gap|timegap }}</span>{% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">Negative gap = you're already under the recruit standard. Standards shown are sample data.</p>
+      </div>
+
+      <aside class="detail-side">
+        <div class="card match-panel">
+          {# TODO: implement multi-event match scoring — score is a hardcoded placeholder #}
+          <div class="match-badge match-badge--xl">
+            <span class="match-badge__value">{{ score }}<small>%</small></span>
+            <span class="match-badge__label">Match</span>
+          </div>
+          <p class="match-panel__note">
+            {% if swimmer %}Placeholder score for {{ swimmer.first_name }}.{% endif %}
+            Multi-event scoring is in development.
+          </p>
+          <button class="btn btn-accent btn-block" type="button" disabled>Add to shortlist · soon</button>
+        </div>
+
+        <div class="card">
+          <h3>About the program</h3>
+          <p>{{ school.description }}</p>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+{% endblock %}

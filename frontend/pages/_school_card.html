@@ -1,0 +1,36 @@
+{# Program card. Expects `school` and `score` in context. #}
+<article class="card school-card">
+  <div class="school-card__top">
+    <div class="monogram" style="--mono: {{ school.primary_color }}">{{ school.short_name }}</div>
+    {# TODO: implement multi-event match scoring — score is a hardcoded placeholder (backend/routes/schools.py) #}
+    <div class="match-badge" title="Placeholder score — multi-event matching coming soon">
+      <span class="match-badge__value">{{ score }}<small>%</small></span>
+      <span class="match-badge__label">Match</span>
+    </div>
+  </div>
+
+  <h3 class="school-card__name">
+    <a href="{{ url_for('pages.school_detail', school_id=school.id) }}">{{ school.name }}</a>
+  </h3>
+  <p class="meta">{{ school.location }} · {{ school.conference }}</p>
+
+  <div class="pill-row">
+    <span class="pill pill--accent">{{ school.division }}</span>
+    <span class="pill">{{ school.roster_size }} on roster</span>
+    <span class="pill">Avg GPA {{ '%.2f'|format(school.avg_gpa) }}</span>
+  </div>
+
+  {% set stds = school.standards_by_event() %}
+  <dl class="mini-standards">
+    {% for code in ['50_FREE', '100_FREE', '200_IM'] %}
+      <div>
+        <dt>{{ EVENT_LABELS[code] }}</dt>
+        <dd>{{ stds[code].recruit_time|swimtime if stds.get(code) else '—' }}</dd>
+      </div>
+    {% endfor %}
+  </dl>
+
+  <a class="card-link" href="{{ url_for('pages.school_detail', school_id=school.id) }}">
+    View program <span aria-hidden="true">&rarr;</span>
+  </a>
+</article>

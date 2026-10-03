@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Find programs{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <p class="eyebrow eyebrow--light">Program search</p>
+    <h1>Find programs that fit</h1>
+    <p class="lead">Filter by division and state. Match scores will reflect every event you swim once scoring ships.</p>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <form class="card filter-bar" method="get" action="{{ url_for('pages.schools') }}" data-autosubmit>
+      <label class="filter-bar__search">
+        <span class="sr-only">Search</span>
+        <input type="search" name="q" value="{{ filters.q }}" placeholder="Search by school, city or conference">
+      </label>
+      <label>
+        <span class="sr-only">Division</span>
+        <select name="division">
+          <option value="">All divisions</option>
+          {% for d in divisions %}
+            <option value="{{ d }}" {{ 'selected' if filters.division == d }}>{{ d }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        <span class="sr-only">State</span>
+        <select name="state">
+          <option value="">All states</option>
+          {% for s in states %}
+            <option value="{{ s }}" {{ 'selected' if filters.state == s }}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <div class="results-meta">
+      <p><strong>{{ results|length }}</strong> program{{ '' if results|length == 1 else 's' }}</p>
+      {% if filters.q or filters.division or filters.state %}
+        <a href="{{ url_for('pages.schools') }}">Clear filters</a>
+      {% endif %}
+    </div>
+
+    {% if results %}
+      <div class="card-grid">
+        {% for r in results %}
+          {% with school=r.school, score=r.score %}{% include "_school_card.html" %}{% endwith %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="card empty-state">
+        <h2>No programs found</h2>
+        <p>Try a broader search or clear your filters.</p>
+        <a class="btn btn-outline" href="{{ url_for('pages.schools') }}">Clear filters</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

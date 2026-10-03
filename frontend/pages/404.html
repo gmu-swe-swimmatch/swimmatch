@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Page not found{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="card empty-state">
+      <p class="eyebrow">404</p>
+      <h1>False start.</h1>
+      <p>We couldn't find that page.</p>
+      <a class="btn btn-primary" href="{{ url_for('pages.index') }}">Back to home</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

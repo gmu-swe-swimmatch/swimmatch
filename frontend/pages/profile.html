@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}My swimmer profile{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <p class="eyebrow eyebrow--light">Swimmer profile</p>
+    <h1>{{ swimmer.full_name if swimmer else 'Your profile' }}</h1>
+    <p class="lead">Your times are the core of every match. Keep them current after each big meet.</p>
+  </div>
+</section>
+
+{% if not swimmer %}
+<section class="section">
+  <div class="container">
+    <div class="card empty-state">
+      <h2>No swimmer profile yet</h2>
+      <p>Profile creation isn't wired up in this draft. Delete <code>swim.db</code> and restart to re-seed the sample swimmer.</p>
+    </div>
+  </div>
+</section>
+{% else %}
+<section class="section section--tight">
+  <div class="container profile-layout">
+    <aside class="card profile-card">
+      <div class="avatar" aria-hidden="true">{{ swimmer.initials }}</div>
+      <h2 class="profile-card__name">{{ swimmer.full_name }}</h2>
+      <p class="meta">Class of {{ swimmer.grad_year }} · {{ swimmer.hometown }}, {{ swimmer.state }}</p>
+      <dl class="fact-list">
+        <div><dt>Club</dt><dd>{{ swimmer.club_team }}</dd></div>
+        <div><dt>High school</dt><dd>{{ swimmer.high_school }}</dd></div>
+        <div><dt>GPA</dt><dd>{{ '%.2f'|format(swimmer.gpa) if swimmer.gpa else '—' }}</dd></div>
+        <div><dt>Intended major</dt><dd>{{ swimmer.intended_major or '—' }}</dd></div>
+      </dl>
+      {% if swimmer.bio %}<p class="profile-card__bio">{{ swimmer.bio }}</p>{% endif %}
+      <a class="btn btn-accent btn-block" href="{{ url_for('pages.schools') }}">See my matches</a>
+    </aside>
+
+    <div class="profile-main">
+      <div class="card">
+        <div class="card__head">
+          <h2>Best times</h2>
+          <span class="pill">Short-course yards</span>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th scope="col">Event</th><th scope="col">Time</th><th scope="col">Meet</th><th scope="col">Date</th></tr>
+            </thead>
+            <tbody>
+              {% for code, label, t in swimmer.ordered_times() %}
+                <tr>
+                  <th scope="row">{{ label }}</th>
+                  <td class="num">{{ t.time_seconds|swimtime if t else '—' }}</td>
+                  <td>{{ t.meet_name if t and t.meet_name else '—' }}</td>
+                  <td>{{ t.swum_on.strftime('%b %d, %Y') if t and t.swum_on else '—' }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <form class="card profile-form" method="post" action="{{ url_for('athlete.update_swimmer', swimmer_id=swimmer.id) }}">
+        <div class="card__head">
+          <h2>Edit profile</h2>
+          <span class="pill pill--warn">Draft · not saved</span>
+        </div>
+
+        <fieldset>
+          <legend>About you</legend>
+          <div class="form-grid">
+            <label>First name<input type="text" name="first_name" value="{{ swimmer.first_name }}"></label>
+            <label>Last name<input type="text" name="last_name" value="{{ swimmer.last_name }}"></label>
+            <label>Graduation year<input type="number" name="grad_year" value="{{ swimmer.grad_year }}" min="2024" max="2035"></label>
+            <label>GPA<input type="number" name="gpa" step="0.01" min="0" max="5" value="{{ swimmer.gpa }}"></label>
+            <label>Club team<input type="text" name="club_team" value="{{ swimmer.club_team }}"></label>
+            <label>High school<input type="text" name="high_school" value="{{ swimmer.high_school }}"></label>
+            <label class="span-2">Intended major<input type="text" name="intended_major" value="{{ swimmer.intended_major or '' }}"></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Event times <span class="hint">(SCY, e.g. 21.10 or 1:41.80)</span></legend>
+          <div class="form-grid form-grid--times">
+            {% for code, label, t in swimmer.ordered_times() %}
+              <label>{{ label }}
+                <input type="text" name="time_{{ code }}" inputmode="decimal" placeholder="—"
+                       value="{{ t.time_seconds|swimtime if t else '' }}" pattern="^(\d{1,2}:)?\d{1,2}\.\d{2}$">
+              </label>
+            {% endfor %}
+          </div>
+        </fieldset>
+
+        <div class="form-actions">
+          <button type="reset" class="btn btn-outline">Reset</button>
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}
