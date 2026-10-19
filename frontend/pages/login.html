@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Log in{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <p class="eyebrow eyebrow--light">Account</p>
+    <h1>Log in</h1>
+    <p class="lead">Swimmers and coaches log in here. Pick which kind of account you have.</p>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    <form class="card auth-card" method="post" action="{{ url_for('auth.login') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+      {% include "_role_switch.html" %}
+
+      <label>Email<input type="email" name="email" value="{{ email }}" autocomplete="email" required autofocus></label>
+      <label>Password<input type="password" name="password" autocomplete="current-password" required></label>
+
+      <button type="submit" class="btn btn-primary btn-block">Log in</button>
+      <p class="auth-card__alt">New to SwimMatch? <a href="{{ url_for('auth.register', role=role) }}">Create an account</a></p>
+    </form>
+  </div>
+</section>
+{% endblock %}

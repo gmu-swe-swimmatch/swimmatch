@@ -18,6 +18,8 @@ EVENTS = [
 EVENT_LABELS = dict(EVENTS)
 EVENT_CODES = [code for code, _ in EVENTS]
 
+from backend.models.account import ROLE_COACH, ROLE_SWIMMER, ROLES, Account  # noqa: E402
+from backend.models.coach import Coach  # noqa: E402
 from backend.models.school import School, SchoolEventStandard  # noqa: E402
 from backend.models.swimmer import Swimmer, SwimmerEventTime  # noqa: E402
 
@@ -26,6 +28,11 @@ __all__ = [
     "EVENTS",
     "EVENT_LABELS",
     "EVENT_CODES",
+    "Account",
+    "ROLES",
+    "ROLE_SWIMMER",
+    "ROLE_COACH",
+    "Coach",
     "School",
     "SchoolEventStandard",
     "Swimmer",

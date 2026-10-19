@@ -1,0 +1,12 @@
+{# Swimmer / Coach switch. Expects `role` in context; posts as `role`. #}
+<fieldset class="role-switch">
+  <legend>I am a</legend>
+  <div class="role-switch__options">
+    {% for code, label in [('swimmer', 'Swimmer'), ('coach', 'Coach')] %}
+      <label class="role-switch__option">
+        <input type="radio" name="role" value="{{ code }}" {{ 'checked' if role == code }} required>
+        <span>{{ label }}</span>
+      </label>
+    {% endfor %}
+  </div>
+</fieldset>

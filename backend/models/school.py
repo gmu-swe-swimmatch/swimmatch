@@ -31,6 +31,11 @@ class School(db.Model):
         back_populates="school",
         cascade="all, delete-orphan",
     )
+    coaches = db.relationship(
+        "Coach",
+        back_populates="school",
+        cascade="all, delete-orphan",
+    )
 
     @property
     def location(self):

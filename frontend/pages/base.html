@@ -25,7 +25,16 @@
       <nav id="primary-nav" class="nav-links">
         <a href="{{ url_for('pages.schools') }}" class="{{ 'is-active' if request.endpoint in ('pages.schools', 'pages.school_detail') }}">Find programs</a>
         <a href="{{ url_for('pages.profile') }}" class="{{ 'is-active' if request.endpoint == 'pages.profile' }}">My profile</a>
-        <a href="{{ url_for('pages.schools') }}" class="btn btn-accent btn-sm">Get matched</a>
+        {% if current_account %}
+          <span class="nav-account" title="{{ current_account.email }}">{{ current_account.role_label }}</span>
+          <form class="nav-logout" method="post" action="{{ url_for('auth.logout') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-ghost btn-sm">Log out</button>
+          </form>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}" class="{{ 'is-active' if request.endpoint == 'auth.login' }}">Log in</a>
+          <a href="{{ url_for('auth.register') }}" class="btn btn-accent btn-sm">Sign up</a>
+        {% endif %}
       </nav>
     </div>
   </header>

@@ -378,6 +378,34 @@ legend { font-family: var(--font-head); font-weight: 700; font-size: 1rem; color
 .span-2 { grid-column: span 2; }
 .form-actions { display: flex; justify-content: flex-end; gap: 0.75rem; padding-top: 1.25rem; border-top: 1px solid var(--line); }
 
+/* Auth (login / register) */
+.auth-card { max-width: 440px; margin: 0 auto; display: grid; gap: 1.1rem; }
+.auth-card fieldset { margin: 0; }
+.auth-card__alt { margin: 0; text-align: center; color: var(--muted); font-size: 0.95rem; }
+
+/* Swimmer / Coach segmented switch (real radios, keyboard accessible) */
+.role-switch legend { margin-bottom: 0.5rem; font-size: 0.85rem; }
+.role-switch__options {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px;
+  background: #eef3f4; border-radius: var(--radius-sm);
+}
+.role-switch__option { position: relative; display: block; cursor: pointer; }
+.role-switch__option input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.role-switch__option span {
+  display: block; text-align: center; padding: 0.6rem 0.5rem;
+  border-radius: calc(var(--radius-sm) - 3px);
+  font-size: 0.95rem; color: var(--muted); transition: background 0.15s, color 0.15s;
+}
+.role-switch__option input:checked + span { background: var(--surface); color: var(--navy); box-shadow: var(--shadow-sm); }
+.role-switch__option input:focus-visible + span { outline: 3px solid rgba(27, 166, 166, 0.45); outline-offset: 1px; }
+
+/* Logged-in state in the nav */
+.nav-account {
+  font-family: var(--font-head); font-weight: 600; font-size: 0.8rem;
+  color: #7fdada; border: 1px solid rgba(127, 218, 218, 0.4); border-radius: 999px; padding: 0.2em 0.75em;
+}
+.nav-logout { margin: 0; }
+
 .filter-bar { display: grid; grid-template-columns: 1fr 190px 160px auto; gap: 0.75rem; align-items: center; padding: 1rem; }
 
 .results-meta { display: flex; justify-content: space-between; align-items: center; margin: 1.5rem 0 1rem; color: var(--muted); }
@@ -493,6 +521,8 @@ legend { font-family: var(--font-head); font-weight: 700; font-size: 1rem; color
   .nav-links a:not(.btn) { padding: 0.85rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
   .nav-links a.is-active::after { display: none; }
   .nav-links .btn { margin-top: 1rem; }
+  .nav-account { align-self: flex-start; margin-top: 1rem; }
+  .nav-logout .btn { width: 100%; }
 
   .card-grid { grid-template-columns: 1fr; }
   .form-grid { grid-template-columns: 1fr; }
