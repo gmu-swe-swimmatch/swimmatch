@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Recruiting posts{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container page-header__row">
+    <div>
+      <p class="eyebrow eyebrow--light">Recruiting board</p>
+      <h1>What coaches are looking for</h1>
+      <p class="lead">College programs post the events, target times and class years they're recruiting. Open a post for the full details.</p>
+    </div>
+    {% if current_user.is_authenticated and current_user.is_coach %}
+      <a class="btn btn-accent btn-lg" href="{{ url_for('posts.new_post') }}">+ New post</a>
+    {% elif not current_user.is_authenticated %}
+      <a class="btn btn-ghost btn-lg" href="{{ url_for('auth.register') }}">Coach? Post an opening</a>
+    {% endif %}
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container">
+    {# TODO: filters (division, event, grad year) and bookmarking are out of scope for this build. #}
+    <div class="results-meta">
+      <p><strong>{{ posts|length }}</strong> post{{ '' if posts|length == 1 else 's' }}</p>
+    </div>
+
+    {% if posts %}
+      <div class="card-grid">
+        {% for post in posts %}{% include "posts/_post_card.html" %}{% endfor %}
+      </div>
+    {% else %}
+      <div class="card empty-state">
+        <h2>No recruiting posts yet</h2>
+        <p>When coaches publish what they're recruiting for, it'll show up here.</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
