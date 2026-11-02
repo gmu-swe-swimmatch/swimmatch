@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}{{ post.program_name }}{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <a class="back-link" href="{{ url_for('posts.list_posts') }}">&larr; All recruiting posts</a>
+    <h1>{{ post.program_name }}</h1>
+    <p class="lead">Posted by {{ post.coach.name }} · {{ post.created_at.strftime('%B %d, %Y') }}</p>
+    <div class="pill-row">
+      <span class="pill pill--accent">{{ post.division }}</span>
+      <span class="pill pill--light">{{ 'Short-course yards' if post.course == 'SCY' else 'Long-course meters' }}</span>
+      <span class="pill pill--light">Class of {{ post.grad_year }}</span>
+    </div>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container detail-layout">
+    <div class="post-main">
+      <div class="card">
+        <div class="card__head">
+          <h2>Recruiting events</h2>
+          <span class="pill">{{ post.course }}</span>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th scope="col">Event</th><th scope="col" class="num">Target time</th></tr></thead>
+            <tbody>
+              {% for label, seconds in post.event_rows() %}
+                <tr><th scope="row">{{ label }}</th><td class="num"><strong>{{ seconds|swimtime }}</strong></td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title-sm">From the coach</h2>
+        <div class="post-message">{{ post.message }}</div>
+      </div>
+    </div>
+
+    <aside class="detail-side">
+      <div class="card">
+        <h3>Post details</h3>
+        <dl class="fact-list">
+          <div><dt>Program</dt><dd>{{ post.program_name }}</dd></div>
+          <div><dt>Division</dt><dd>{{ post.division }}</dd></div>
+          <div><dt>Course</dt><dd>{{ post.course }}</dd></div>
+          <div><dt>Grad year</dt><dd>{{ post.grad_year }}</dd></div>
+          <div><dt>Coach</dt><dd>{{ post.coach.name }}</dd></div>
+          {% if post.updated_at %}
+            <div><dt>Updated</dt><dd>{{ post.updated_at.strftime('%b %d, %Y') }}</dd></div>
+          {% endif %}
+        </dl>
+        {# TODO: messaging/replies between swimmers and coaches is out of scope for this build. #}
+        <button class="btn btn-accent btn-block" type="button" disabled>Contact coach · coming soon</button>
+      </div>
+
+      {% if post.is_owned_by(current_user) %}
+        <div class="card owner-panel">
+          <h3>Manage your post</h3>
+          <a class="btn btn-primary btn-block" href="{{ url_for('posts.edit_post', post_id=post.id) }}">Edit post</a>
+          <form method="post" action="{{ url_for('posts.delete_post', post_id=post.id) }}"
+                data-confirm="Delete this post? This can't be undone.">
+            {{ csrf_field() }}
+            <button type="submit" class="btn btn-danger btn-block">Delete post</button>
+          </form>
+        </div>
+      {% endif %}
+    </aside>
+  </div>
+</section>
+{% endblock %}

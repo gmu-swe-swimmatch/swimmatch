@@ -26,3 +26,28 @@
     });
   });
 })();
+
+// Confirm destructive form submissions (e.g. deleting a post)
+(function () {
+  "use strict";
+  document.querySelectorAll("form[data-confirm]").forEach(function (form) {
+    form.addEventListener("submit", function (event) {
+      if (!window.confirm(form.getAttribute("data-confirm"))) event.preventDefault();
+    });
+  });
+
+  // Post form: highlight a row when its event is checked, and focus its time input
+  document.querySelectorAll("[data-event-toggle]").forEach(function (box) {
+    var row = box.closest(".event-row");
+    var time = row && row.querySelector(".event-row__time input");
+    box.addEventListener("change", function () {
+      row.classList.toggle("is-checked", box.checked);
+      if (box.checked && time && !time.value) time.focus();
+    });
+    if (time) {
+      time.addEventListener("input", function () {
+        if (time.value && !box.checked) { box.checked = true; row.classList.add("is-checked"); }
+      });
+    }
+  });
+})();

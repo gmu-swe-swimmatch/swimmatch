@@ -4,9 +4,11 @@ All schools, people and times below are FICTIONAL placeholders.
 """
 from datetime import date
 
+from flask import current_app
 from sqlalchemy import select
 
-from backend.models import School, SchoolEventStandard, Swimmer, SwimmerEventTime, db
+from backend.models import Post, School, SchoolEventStandard, Swimmer, SwimmerEventTime, User, db
+from backend.models.user import ROLE_COACH
 
 # Baseline men's SCY recruiting times (seconds) for a strong D1 program.
 # Each sample school scales these by a factor so standards look realistic.
@@ -134,5 +136,63 @@ def seed_if_empty():
                 )
             )
         db.session.add(swimmer)
+
+    db.session.commit()
+
+    if current_app.config.get("SEED_DEMO_ACCOUNTS", False):
+        seed_demo_coach_and_posts()
+
+
+# --- Demo coach + recruiting posts --------------------------------------------------------
+# Local-development credentials only (documented in README). Disable with SWIMMATCH_SEED_DEMO=0.
+DEMO_COACH = {"name": "Coach Dana Whitfield", "email": "coach@swimmatch.test", "password": "SwimCoach2026!"}
+
+SAMPLE_POSTS = [
+    {
+        "program_name": "Lakeshore State University Men's Swimming",
+        "division": "NCAA D1",
+        "course": "SCY",
+        "grad_year": 2027,
+        "recruiting_events": ["50_FREE", "100_FREE", "100_FLY"],
+        "target_times": {"50_FREE": 20.40, "100_FREE": 44.60, "100_FLY": 48.10},
+        "message": "We're building our sprint group for the class of 2027. Looking for athletes who can "
+                   "contribute on relays right away and who want a strong engineering or business program. "
+                   "Send us your best times and your most recent meet results.",
+    },
+    {
+        "program_name": "Lakeshore State University Men's Swimming",
+        "division": "NCAA D1",
+        "course": "SCY",
+        "grad_year": 2028,
+        "recruiting_events": ["500_FREE", "200_FREE", "200_IM"],
+        "target_times": {"500_FREE": 263.50, "200_FREE": 97.80, "200_IM": 108.90},
+        "message": "Our distance group is one of the best in the conference. For 2028 we want mid-distance "
+                   "and distance freestylers who love aerobic work and are still improving quickly.",
+    },
+    {
+        "program_name": "Lakeshore State University Summer Long Course",
+        "division": "NCAA D1",
+        "course": "LCM",
+        "grad_year": 2027,
+        "recruiting_events": ["100_BACK", "100_BREAST"],
+        "target_times": {"100_BACK": 56.50, "100_BREAST": 63.20},
+        "message": "Stroke specialists: we evaluate long course times too. If your best swims came this "
+                   "summer, post them in LCM and we'll take a look.",
+    },
+]
+
+
+def seed_demo_coach_and_posts():
+    """Create the demo coach and sample posts if they don't exist yet (works on an existing swim.db)."""
+    coach = db.session.execute(select(User).where(User.email == DEMO_COACH["email"])).scalars().first()
+    if coach is None:
+        coach = User(name=DEMO_COACH["name"], email=DEMO_COACH["email"], role=ROLE_COACH)
+        coach.set_password(DEMO_COACH["password"])
+        db.session.add(coach)
+        db.session.flush()
+
+    if db.session.execute(select(Post).limit(1)).first() is None:
+        for data in SAMPLE_POSTS:
+            db.session.add(Post(coach_id=coach.id, **data))
 
     db.session.commit()

@@ -46,11 +46,17 @@ def create_app(test_config=None):
         SECRET_KEY=os.environ.get("SECRET_KEY", "dev-not-secret"),
         SQLALCHEMY_DATABASE_URI=_database_uri(),
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
+        # Seed the demo coach account + sample posts on an empty DB. Turn off outside local dev.
+        SEED_DEMO_ACCOUNTS=os.environ.get("SWIMMATCH_SEED_DEMO", "1") == "1",
     )
     if test_config:
         app.config.update(test_config)
 
     db.init_app(app)
+
+    from backend.security import init_security
+
+    init_security(app)
 
     from backend.routes import register_blueprints
 
@@ -70,6 +76,10 @@ def create_app(test_config=None):
     @app.errorhandler(404)
     def not_found(_error):
         return render_template("404.html"), 404
+
+    @app.errorhandler(403)
+    def forbidden(_error):
+        return render_template("403.html"), 403
 
     with app.app_context():
         db.create_all()

@@ -23,9 +23,23 @@
         <span></span><span></span><span></span>
       </button>
       <nav id="primary-nav" class="nav-links">
+        <a href="{{ url_for('posts.list_posts') }}" class="{{ 'is-active' if request.endpoint in ('posts.list_posts', 'posts.view_post') }}">Recruiting posts</a>
         <a href="{{ url_for('pages.schools') }}" class="{{ 'is-active' if request.endpoint in ('pages.schools', 'pages.school_detail') }}">Find programs</a>
-        <a href="{{ url_for('pages.profile') }}" class="{{ 'is-active' if request.endpoint == 'pages.profile' }}">My profile</a>
-        <a href="{{ url_for('pages.schools') }}" class="btn btn-accent btn-sm">Get matched</a>
+        {% if current_user.is_authenticated %}
+          {% if current_user.is_coach %}
+            <a href="{{ url_for('posts.new_post') }}" class="btn btn-accent btn-sm">+ New post</a>
+          {% else %}
+            <a href="{{ url_for('pages.profile') }}" class="{{ 'is-active' if request.endpoint == 'pages.profile' }}">My profile</a>
+          {% endif %}
+          <form class="nav-logout" method="post" action="{{ url_for('auth.logout') }}">
+            {{ csrf_field() }}
+            <span class="nav-user" title="Logged in as {{ current_user.role }}">{{ current_user.name }} <small>{{ current_user.role }}</small></span>
+            <button type="submit" class="btn btn-ghost btn-sm">Log out</button>
+          </form>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}" class="{{ 'is-active' if request.endpoint == 'auth.login' }}">Log in</a>
+          <a href="{{ url_for('auth.register') }}" class="btn btn-accent btn-sm">Sign up</a>
+        {% endif %}
       </nav>
     </div>
   </header>
@@ -54,6 +68,7 @@
         <p class="footer-tag">Find the program where your times fit.</p>
       </div>
       <nav class="footer-links" aria-label="Footer">
+        <a href="{{ url_for('posts.list_posts') }}">Recruiting posts</a>
         <a href="{{ url_for('pages.schools') }}">Find programs</a>
         <a href="{{ url_for('pages.profile') }}">My profile</a>
         <a href="{{ url_for('pages.index') }}#how-it-works">How it works</a>
