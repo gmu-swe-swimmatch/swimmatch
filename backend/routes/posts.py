@@ -52,11 +52,44 @@ def _apply(post, data):
     post.target_times = data["target_times"]
 
 
+def _post_filters():
+    """Read ?division=&course=&grad_year= from the URL. Unknown values are ignored (treated as "All")."""
+    division = request.args.get("division", "").strip()
+    course = request.args.get("course", "").strip().upper()
+    grad_year = request.args.get("grad_year", "").strip()
+    return {
+        "division": division if division in DIVISIONS else "",
+        "course": course if course in COURSES else "",
+        "grad_year": int(grad_year) if grad_year.isdigit() else None,
+    }
+
+
 @posts_bp.get("/")
 def list_posts():
-    # TODO: filtering (division, event, grad year) is out of scope for this build.
-    posts = db.session.execute(select(Post).order_by(Post.created_at.desc(), Post.id.desc())).scalars().all()
-    return render_template("posts/list.html", posts=posts)
+    # TODO: filtering by event and bookmarking are out of scope for this build.
+    filters = _post_filters()
+    stmt = select(Post).order_by(Post.created_at.desc(), Post.id.desc())
+    if filters["division"]:
+        stmt = stmt.where(Post.division == filters["division"])
+    if filters["course"]:
+        stmt = stmt.where(Post.course == filters["course"])
+    if filters["grad_year"] is not None:
+        stmt = stmt.where(Post.grad_year == filters["grad_year"])
+    posts = db.session.execute(stmt).scalars().all()
+
+    # Offer only grad years that some post actually uses, so no option leads to an empty list.
+    grad_years = db.session.execute(select(Post.grad_year).distinct().order_by(Post.grad_year)).scalars().all()
+    active_filters = sum(1 for value in filters.values() if value)
+
+    return render_template(
+        "posts/list.html",
+        posts=posts,
+        filters=filters,
+        active_filters=active_filters,
+        divisions=DIVISIONS,
+        courses=COURSES,
+        grad_years=grad_years,
+    )
 
 
 @posts_bp.get("/<int:post_id>")

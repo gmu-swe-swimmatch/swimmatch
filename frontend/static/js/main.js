@@ -36,6 +36,19 @@
     });
   });
 
+  // Filter dropdown (<details>): close on outside click or Escape
+  document.querySelectorAll("details[data-filter-menu]").forEach(function (menu) {
+    document.addEventListener("click", function (event) {
+      if (menu.open && !menu.contains(event.target)) menu.open = false;
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && menu.open) {
+        menu.open = false;
+        menu.querySelector("summary").focus();
+      }
+    });
+  });
+
   // Post form: highlight a row when its event is checked, and focus its time input
   document.querySelectorAll("[data-event-toggle]").forEach(function (box) {
     var row = box.closest(".event-row");
