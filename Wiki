@@ -1,0 +1,50 @@
+## Challenges
+
+### Narrowing the product after user research
+Our first scaffold was a swimmer-side matcher: enter your times, see which programs fit. Our
+user interview (`elicitation/elicitation_interview_01.md`) showed that SwimCloud already does
+time comparison well, and the swimmer described its data as very accurate. The real gap was on
+the coach side: swimmers can't tell what coaches are actively recruiting for or whether spots
+are open. We changed Sprint 1 to **Feature 1 – Coach recruiting posts**. That meant reworking
+the backlog and the use case diagram partway through the sprint, and leaving the original
+matching scaffold in place with placeholder logic (`compute_match_score` is still a TODO).
+
+### Adding accounts and roles to an app built without them
+The original scaffold had no users, so several routes assumed a single hard-coded swimmer.
+Coach posts needed two roles (coach / swimmer) with different permissions. We had to work out
+where each check belongs: visitors go to the login page, swimmers get 403 on coach-only pages,
+and a coach can only edit or delete their *own* posts. That ownership check runs on the server
+for every edit and delete, not just by hiding buttons.
+
+### Security without a forms library
+We don't use WTForms, so CSRF protection, input validation and safe login redirects all had to
+be written by hand (`backend/security.py`, `backend/validation.py`). Validating swim times was
+harder than expected: times arrive in two formats (`46.50` and `1:41.80`), have to be checked
+against realistic ranges per event, and the 500 Free only exists in yards, not LCM.
+
+### Login hardening and testing
+Register/login worked for normal use, but testing edge cases found two gaps: unlimited
+password guessing, and a server error if two people registered the same email at the same
+moment. We added a failed-login limit (5 attempts per 15 minutes per IP + email) and handled
+the duplicate-email case. The project also had no automated tests, so we added a pytest suite
+(26 tests) covering registration, login, logout, role permissions and the rate limit.
+
+### Data model trade-offs for filtering
+Each post stores its events and target times as JSON, because a post's events are always
+read and saved together. That made division, course and grad-year filters easy, but **filtering
+by event** is harder, since the database can't easily search inside the JSON column. We either
+filter in Python or move events to their own table later.
+
+### Coordinating a four-plus-person team
+Most early code landed in a few large commits, which made reviews and merges harder. For
+Sprint 1 we switched to feature branches with pull requests (#17 coach posts, #18 filters) and
+split work by user story so people weren't editing the same files at once.
+
+### Individual challenges
+| Team member | Area | Challenge | How we handled it |
+|---|---|---|---|
+| Deniz | Create / Edit posts, wiki summary | | |
+| Michael | Filters, View / Browse | | |
+| Aziz | Use case diagram | | |
+| Ayush | Register / login | Brute-force logins and a duplicate-email crash found in testing | Added a login rate limit, handled the duplicate case, wrote 26 auth tests |
+| [lead's name] | Issues, project board | | |
