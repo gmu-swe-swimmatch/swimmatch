@@ -19,14 +19,65 @@
 
 <section class="section section--tight">
   <div class="container">
-    {# TODO: filters (division, event, grad year) and bookmarking are out of scope for this build. #}
+    {# Filter dropdown: a plain GET form inside <details>, so it works without JavaScript. #}
     <div class="results-meta">
       <p><strong>{{ posts|length }}</strong> post{{ '' if posts|length == 1 else 's' }}</p>
+
+      <details class="filter-menu" data-filter-menu>
+        <summary class="btn btn-outline btn-sm">
+          Filter{% if active_filters %} <span class="filter-menu__count">{{ active_filters }}</span>{% endif %}
+        </summary>
+        <form class="card filter-menu__panel" method="get" action="{{ url_for('posts.list_posts') }}">
+          <label>Division
+            <select name="division">
+              <option value="">All divisions</option>
+              {% for d in divisions %}
+                <option value="{{ d }}" {{ 'selected' if filters.division == d }}>{{ d }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label>Course
+            <select name="course">
+              <option value="">All courses</option>
+              {% for c in courses %}
+                <option value="{{ c }}" {{ 'selected' if filters.course == c }}>{{ c }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label>Grad year
+            <select name="grad_year">
+              <option value="">All years</option>
+              {% for y in grad_years %}
+                <option value="{{ y }}" {{ 'selected' if filters.grad_year == y }}>Class of {{ y }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <div class="filter-menu__actions">
+            <a class="btn btn-outline btn-sm" href="{{ url_for('posts.list_posts') }}">Clear</a>
+            <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+          </div>
+        </form>
+      </details>
     </div>
+
+    {% if active_filters %}
+      <div class="pill-row active-filters" aria-label="Active filters">
+        {% if filters.division %}<span class="pill pill--accent">{{ filters.division }}</span>{% endif %}
+        {% if filters.course %}<span class="pill pill--accent">{{ filters.course }}</span>{% endif %}
+        {% if filters.grad_year %}<span class="pill pill--accent">Class of {{ filters.grad_year }}</span>{% endif %}
+        <a href="{{ url_for('posts.list_posts') }}">Clear filters</a>
+      </div>
+    {% endif %}
 
     {% if posts %}
       <div class="card-grid">
         {% for post in posts %}{% include "posts/_post_card.html" %}{% endfor %}
+      </div>
+    {% elif active_filters %}
+      <div class="card empty-state">
+        <h2>No posts match these filters</h2>
+        <p>Try a different division, course or grad year.</p>
+        <a class="btn btn-outline" href="{{ url_for('posts.list_posts') }}">Clear filters</a>
       </div>
     {% else %}
       <div class="card empty-state">

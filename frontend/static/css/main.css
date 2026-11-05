@@ -605,6 +605,27 @@ fieldset.has-error legend { color: var(--bad); }
 .post-message { white-space: pre-line; overflow-wrap: anywhere; }
 .owner-panel h3 { margin-bottom: 0.9rem; }
 
+/* Recruiting posts: Filter button + dropdown panel (<details>, works without JS) */
+.filter-menu { position: relative; }
+.filter-menu > summary { list-style: none; display: inline-flex; align-items: center; gap: 0.45rem; }
+.filter-menu > summary::-webkit-details-marker { display: none; }
+.filter-menu > summary::after { content: "▾"; font-size: 0.8em; transition: transform 0.15s; }
+.filter-menu[open] > summary::after { transform: rotate(180deg); }
+.filter-menu[open] > summary { border-color: var(--navy); }
+.filter-menu__count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 1.35rem; height: 1.35rem; padding: 0 0.35rem; border-radius: 999px;
+  background: var(--teal); color: #fff; font-size: 0.75rem; line-height: 1;
+}
+.filter-menu__panel {
+  position: absolute; right: 0; top: calc(100% + 0.5rem); z-index: 20;
+  width: min(300px, calc(100vw - 2 * var(--gutter)));
+  display: grid; gap: 0.9rem; padding: 1.1rem; box-shadow: var(--shadow-lg);
+}
+.filter-menu__actions { display: flex; justify-content: flex-end; gap: 0.5rem; padding-top: 0.25rem; }
+.active-filters { align-items: center; }
+.active-filters a { font-size: 0.9rem; margin-left: 0.25rem; }
+
 @media (max-width: 960px) {
   .nav-links { gap: 1.1rem; }
 }
