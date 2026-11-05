@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Log in{% endblock %}
+
+{% block content %}
+<section class="section auth-section">
+  <div class="container">
+    <div class="card auth-card">
+      <p class="eyebrow">Welcome back</p>
+      <h1 class="auth-card__title">Log in to SwimMatch</h1>
+
+      {% if error %}<div class="form-alert" role="alert">{{ error }}</div>{% endif %}
+
+      <form method="post" action="{{ url_for('auth.login', next=next) if next else url_for('auth.login') }}" novalidate>
+        {{ csrf_field() }}
+        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+        <label>Email
+          <input type="email" name="email" value="{{ email }}" autocomplete="email" required autofocus>
+        </label>
+        <label>Password
+          <input type="password" name="password" autocomplete="current-password" required>
+        </label>
+        <label class="check">
+          <input type="checkbox" name="remember" value="1"> Keep me logged in
+        </label>
+        <button type="submit" class="btn btn-primary btn-block">Log in</button>
+      </form>
+
+      <p class="auth-card__alt">New here? <a href="{{ url_for('auth.register') }}">Create an account</a></p>
+    </div>
+  </div>
+</section>
+{% endblock %}

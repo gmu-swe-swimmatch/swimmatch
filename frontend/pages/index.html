@@ -8,14 +8,20 @@
   <div class="container hero__grid">
     <div class="hero__copy">
       <p class="eyebrow eyebrow--light">College recruiting, by the clock</p>
-      <h1>Find the program where your times fit.</h1>
+      <h1>Where college coaches and swimmers find each other.</h1>
       <p class="lead">
-        You're more than one number. SwimMatch compares every event you swim against each
-        program's recruiting standards, so you can build a realistic, ambitious college list.
+        Coaches post exactly what their program is recruiting: events, target times, course and class year.
+        Swimmers browse the board and see where their times fit.
       </p>
       <div class="hero__actions">
-        <a class="btn btn-accent btn-lg" href="{{ url_for('pages.profile') }}">Enter your times</a>
-        <a class="btn btn-ghost btn-lg" href="{{ url_for('pages.schools') }}">Browse {{ school_count }} programs</a>
+        <a class="btn btn-accent btn-lg" href="{{ url_for('posts.list_posts') }}">Browse recruiting posts</a>
+        {% if current_user.is_authenticated and current_user.is_coach %}
+          <a class="btn btn-ghost btn-lg" href="{{ url_for('posts.new_post') }}">Post what you're recruiting</a>
+        {% elif not current_user.is_authenticated %}
+          <a class="btn btn-ghost btn-lg" href="{{ url_for('auth.register') }}">I'm a coach — post an opening</a>
+        {% else %}
+          <a class="btn btn-ghost btn-lg" href="{{ url_for('pages.schools') }}">Browse {{ school_count }} programs</a>
+        {% endif %}
       </div>
       <ul class="hero__stats">
         <li><strong>8</strong><span>events compared</span></li>
@@ -57,24 +63,43 @@
     <ol class="steps">
       <li class="card step">
         <span class="step__num">01</span>
-        <h3>Build your swimmer profile</h3>
-        <p>Add your best short-course yards times across freestyle, stroke and IM events, plus academics and preferences.</p>
+        <h3>Coaches post what they need</h3>
+        <p>Programs list the events, target times, course and graduation year they're recruiting for this cycle.</p>
       </li>
       <li class="card step">
         <span class="step__num">02</span>
-        <h3>Compare event by event</h3>
-        <p>We line up each of your times against every program's recruit and walk-on standards — not a single rating.</p>
+        <h3>Swimmers browse the board</h3>
+        <p>Read every post and compare event by event — you're more than a single rating.</p>
       </li>
       <li class="card step">
         <span class="step__num">03</span>
-        <h3>Shortlist with confidence</h3>
-        <p>See where you'd contribute right away, where you're close, and which programs are reaches worth emailing.</p>
+        <h3>Connect with the right fit</h3>
+        <p>Spot where you'd contribute right away and which programs are worth reaching out to. Messaging is coming soon.</p>
       </li>
     </ol>
   </div>
 </section>
 
 <section class="section section--tint">
+  <div class="container">
+    <div class="section-head section-head--row">
+      <div>
+        <p class="eyebrow">Latest from coaches</p>
+        <h2>Who's recruiting right now</h2>
+      </div>
+      <a class="btn btn-outline" href="{{ url_for('posts.list_posts') }}">See all posts</a>
+    </div>
+    {% if recent_posts %}
+      <div class="card-grid">
+        {% for post in recent_posts %}{% include "posts/_post_card.html" %}{% endfor %}
+      </div>
+    {% else %}
+      <div class="card empty-state"><p>No recruiting posts yet — check back soon.</p></div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="section">
   <div class="container">
     <div class="section-head section-head--row">
       <div>

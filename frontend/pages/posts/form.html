@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit post' if post else 'New recruiting post' }}{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    {% if post %}
+      <a class="back-link" href="{{ url_for('posts.view_post', post_id=post.id) }}">&larr; Back to post</a>
+    {% else %}
+      <a class="back-link" href="{{ url_for('posts.list_posts') }}">&larr; All recruiting posts</a>
+    {% endif %}
+    <p class="eyebrow eyebrow--light">{{ 'Edit post' if post else 'New post' }}</p>
+    <h1>{{ 'Update your recruiting post' if post else 'Tell swimmers what you’re recruiting' }}</h1>
+    <p class="lead">Be specific about events and target times — swimmers use them to decide whether to reach out.</p>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container narrow">
+    <form class="card post-form" method="post"
+          action="{{ url_for('posts.edit_post', post_id=post.id) if post else url_for('posts.new_post') }}" novalidate>
+      {{ csrf_field() }}
+
+      {% if errors %}
+        <div class="form-alert" role="alert">
+          <strong>Your post wasn't saved.</strong> Please fix the following:
+          <ul>{% for msg in errors.values() %}<li>{{ msg }}</li>{% endfor %}</ul>
+        </div>
+      {% endif %}
+
+      <fieldset>
+        <legend>Program</legend>
+        <div class="form-grid">
+          <label class="span-2 {{ 'has-error' if errors.get('program_name') }}">Program name
+            <input type="text" name="program_name" maxlength="160" required
+                   value="{{ values.get('program_name', '') }}" placeholder="e.g. Lakeshore State Men's Swimming">
+          </label>
+          <label class="{{ 'has-error' if errors.get('division') }}">Division
+            <select name="division" required>
+              <option value="">Choose…</option>
+              {% for d in divisions %}
+                <option value="{{ d }}" {{ 'selected' if values.get('division') == d }}>{{ d }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label class="{{ 'has-error' if errors.get('grad_year') }}">Graduation year
+            <select name="grad_year" required>
+              <option value="">Choose…</option>
+              {% for y in grad_years %}
+                <option value="{{ y }}" {{ 'selected' if values.get('grad_year')|string == y|string }}>Class of {{ y }}</option>
+              {% endfor %}
+            </select>
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset class="{{ 'has-error' if errors.get('course') }}">
+        <legend>Course</legend>
+        <div class="segmented">
+          {% for c in courses %}
+            <label class="segmented__option">
+              <input type="radio" name="course" value="{{ c }}" {{ 'checked' if values.get('course', 'SCY') == c }}>
+              <span>{{ c }} <small>{{ 'yards' if c == 'SCY' else 'meters' }}</small></span>
+            </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+
+      <fieldset class="{{ 'has-error' if errors.get('events') }}">
+        <legend>Recruiting events &amp; target times <span class="hint">(e.g. 46.50 or 1:41.80)</span></legend>
+        <div class="event-picker">
+          {% for code, label in EVENTS %}
+            {% set checked = values.get('event_' ~ code) %}
+            <div class="event-row {{ 'is-checked' if checked }}">
+              <label class="check">
+                <input type="checkbox" name="event_{{ code }}" value="on" {{ 'checked' if checked }} data-event-toggle>
+                {{ label }}
+              </label>
+              <label class="event-row__time">
+                <span class="sr-only">{{ label }} target time</span>
+                <input type="text" name="time_{{ code }}" inputmode="decimal" placeholder="Target time"
+                       value="{{ values.get('time_' ~ code, '') }}">
+              </label>
+            </div>
+          {% endfor %}
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Message to swimmers</legend>
+        <label class="{{ 'has-error' if errors.get('message') }}">
+          <span class="sr-only">Message</span>
+          <textarea name="message" rows="7" maxlength="4000" required
+                    placeholder="What kind of athlete are you looking for? Academics, team culture, scholarship notes…">{{ values.get('message', '') }}</textarea>
+        </label>
+      </fieldset>
+
+      <div class="form-actions">
+        <a class="btn btn-outline" href="{{ url_for('posts.view_post', post_id=post.id) if post else url_for('posts.list_posts') }}">Cancel</a>
+        <button type="submit" class="btn btn-primary">{{ 'Save changes' if post else 'Publish post' }}</button>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

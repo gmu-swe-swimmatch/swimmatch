@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Create an account{% endblock %}
+
+{% macro field_error(name) %}
+  {% if errors.get(name) %}<p class="field-error" id="{{ name }}-error">{{ errors[name] }}</p>{% endif %}
+{% endmacro %}
+
+{% block content %}
+<section class="section auth-section">
+  <div class="container">
+    <div class="card auth-card auth-card--wide">
+      <p class="eyebrow">Join SwimMatch</p>
+      <h1 class="auth-card__title">Create your account</h1>
+
+      {% if errors %}<div class="form-alert" role="alert">Please fix the highlighted fields below.</div>{% endif %}
+
+      <form method="post" action="{{ url_for('auth.register') }}" novalidate>
+        {{ csrf_field() }}
+
+        <fieldset class="role-picker {{ 'has-error' if errors.get('role') }}">
+          <legend>I am a…</legend>
+          <div class="role-options">
+            <label class="role-option">
+              <input type="radio" name="role" value="coach" {{ 'checked' if form.get('role') == 'coach' }} required>
+              <span class="role-option__body">
+                <strong>College coach</strong>
+                <span>Post what your program is recruiting for.</span>
+              </span>
+            </label>
+            <label class="role-option">
+              <input type="radio" name="role" value="swimmer" {{ 'checked' if form.get('role') == 'swimmer' }}>
+              <span class="role-option__body">
+                <strong>Swimmer</strong>
+                <span>Browse programs and coach posts.</span>
+              </span>
+            </label>
+          </div>
+          {{ field_error('role') }}
+        </fieldset>
+
+        <div class="form-grid">
+          <label class="span-2 {{ 'has-error' if errors.get('name') }}">Full name
+            <input type="text" name="name" value="{{ form.get('name', '') }}" maxlength="80" autocomplete="name" required>
+            {{ field_error('name') }}
+          </label>
+          <label class="span-2 {{ 'has-error' if errors.get('email') }}">Email
+            <input type="email" name="email" value="{{ form.get('email', '') }}" maxlength="254" autocomplete="email" required>
+            {{ field_error('email') }}
+          </label>
+          <label class="{{ 'has-error' if errors.get('password') }}">Password
+            <input type="password" name="password" minlength="8" maxlength="128" autocomplete="new-password" required>
+            {{ field_error('password') }}
+          </label>
+          <label class="{{ 'has-error' if errors.get('confirm_password') }}">Confirm password
+            <input type="password" name="confirm_password" autocomplete="new-password" required>
+            {{ field_error('confirm_password') }}
+          </label>
+        </div>
+        <p class="hint">At least 8 characters.</p>
+
+        <button type="submit" class="btn btn-accent btn-block">Create account</button>
+      </form>
+
+      <p class="auth-card__alt">Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a></p>
+    </div>
+  </div>
+</section>
+{% endblock %}

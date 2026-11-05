@@ -20,8 +20,12 @@ EVENT_CODES = [code for code, _ in EVENTS]
 
 from backend.models.school import School, SchoolEventStandard  # noqa: E402
 from backend.models.swimmer import Swimmer, SwimmerEventTime  # noqa: E402
+from backend.models.user import User  # noqa: E402
+from backend.models.post import Post  # noqa: E402
 
 __all__ = [
+    "User",
+    "Post",
     "db",
     "EVENTS",
     "EVENT_LABELS",

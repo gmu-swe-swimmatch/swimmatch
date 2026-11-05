@@ -1,0 +1,28 @@
+{# Recruiting post card. Expects `post` in context. #}
+<article class="card post-card">
+  <div class="post-card__head">
+    <div class="pill-row">
+      <span class="pill pill--accent">{{ post.division }}</span>
+      <span class="pill">{{ post.course }}</span>
+      <span class="pill">Class of {{ post.grad_year }}</span>
+    </div>
+    {% if post.is_owned_by(current_user) %}<span class="pill pill--warn">Your post</span>{% endif %}
+  </div>
+
+  <h3 class="post-card__title">
+    <a href="{{ url_for('posts.view_post', post_id=post.id) }}">{{ post.program_name }}</a>
+  </h3>
+  <p class="meta">{{ post.coach.name }} · Posted {{ post.created_at.strftime('%b %d, %Y') }}</p>
+
+  <ul class="event-chips" aria-label="Recruiting events">
+    {% for label, seconds in post.event_rows() %}
+      <li><span>{{ label }}</span><b>{{ seconds|swimtime }}</b></li>
+    {% endfor %}
+  </ul>
+
+  <p class="post-card__excerpt">{{ post.message|truncate(160) }}</p>
+
+  <a class="card-link" href="{{ url_for('posts.view_post', post_id=post.id) }}">
+    Read post <span aria-hidden="true">&rarr;</span>
+  </a>
+</article>

@@ -2,7 +2,7 @@
 from flask import Blueprint, render_template, request
 from sqlalchemy import select
 
-from backend.models import School, Swimmer, db
+from backend.models import Post, School, Swimmer, db
 from backend.routes.schools import (
     DIVISIONS,
     available_states,
@@ -23,7 +23,12 @@ def index():
     swimmer = current_swimmer()
     featured = search_schools()[:3]
     results = [{"school": s, "score": compute_match_score(swimmer, s)} for s in featured]
-    return render_template("index.html", featured=results, school_count=len(search_schools()))
+    recent_posts = db.session.execute(
+        select(Post).order_by(Post.created_at.desc(), Post.id.desc()).limit(3)
+    ).scalars().all()
+    return render_template(
+        "index.html", featured=results, school_count=len(search_schools()), recent_posts=recent_posts
+    )
 
 
 @pages_bp.get("/profile")
