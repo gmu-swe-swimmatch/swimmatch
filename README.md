@@ -108,6 +108,9 @@ backend/
     pages.py            # HTML pages: /, /profile, /schools, /schools/<id>
     athlete.py          # swimmer profile CRUD (stubbed)
     schools.py          # search, match-score stub, JSON API under /api/schools
+  services/
+    __init__.py         # service layer package
+    posts.py            # business logic for creating recruiting posts
 frontend/
   pages/                # Jinja templates (base layout, pages, partials)
     auth/               # login, register
@@ -130,7 +133,6 @@ frontend/
 
 - Messaging and replies between swimmers and coaches (the "Contact coach" button is disabled)
 - Swimmer stats profiles tied to accounts
-- Filtering and bookmarking posts
-- Rate-limiting failed logins
+- Filtering by event and bookmarking posts
 - Multi-event match scoring in `compute_match_score`; wire up the profile form
 - Women's standards and LCM → SCY conversion
