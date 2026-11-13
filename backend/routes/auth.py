@@ -1,9 +1,11 @@
 """Register / login / logout."""
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from backend import login_throttle
 from backend.models import User, db
 from backend.security import is_safe_redirect
 from backend.validation import validate_registration
@@ -37,7 +39,13 @@ def register():
             user = User(name=form["name"], email=form["email"], role=form["role"])
             user.set_password(form["password"])
             db.session.add(user)
-            db.session.commit()
+            try:
+                db.session.commit()
+            except IntegrityError:
+                # Another request registered the same email between our check and the insert.
+                db.session.rollback()
+                errors["email"] = "An account with that email already exists."
+        if not errors:
             login_user(user)
             flash(f"Welcome to SwimMatch, {user.name}!", "success")
             if user.is_coach:
@@ -53,22 +61,33 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for("posts.list_posts"))
 
-    email, error = "", None
+    email, error, status = "", None, 200
     if request.method == "POST":
         email = (request.form.get("email") or "").strip().lower()
         password = request.form.get("password") or ""
-        user = db.session.execute(select(User).where(User.email == email)).scalars().first() if email else None
-        if user and user.check_password(password):
-            login_user(user, remember=bool(request.form.get("remember")))
-            flash(f"Welcome back, {user.name}.", "success")
-            return _redirect_after_login()
-        if user is None:
-            check_password_hash(_DUMMY_HASH, password)
-        # TODO: rate-limit repeated failed logins (out of scope for this MVP).
-        error = "Invalid email or password."
+        ip = request.remote_addr
+        cfg = current_app.config
+        wait = login_throttle.retry_after(ip, email, cfg["LOGIN_MAX_FAILURES"], cfg["LOGIN_WINDOW_SECONDS"])
+        if wait:
+            minutes = max(1, -(-wait // 60))
+            error = f"Too many failed attempts. Try again in {minutes} minute{'s' if minutes != 1 else ''}."
+            status = 429
+        else:
+            user = db.session.execute(select(User).where(User.email == email)).scalars().first() if email else None
+            if user and user.check_password(password):
+                login_throttle.clear(ip, email)
+                login_user(user, remember=bool(request.form.get("remember")))
+                flash(f"Welcome back, {user.name}.", "success")
+                return _redirect_after_login()
+            if user is None:
+                check_password_hash(_DUMMY_HASH, password)
+            login_throttle.record_failure(ip, email)
+            error, status = "Invalid email or password.", 401
 
-    return render_template("auth/login.html", email=email, error=error,
-                           next=request.values.get("next", "")), (401 if error else 200)
+    response = render_template("auth/login.html", email=email, error=error,
+                               next=request.values.get("next", ""))
+    headers = {"Retry-After": str(wait)} if status == 429 else {}
+    return response, status, headers
 
 
 @auth_bp.post("/logout")

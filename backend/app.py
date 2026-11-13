@@ -48,6 +48,9 @@ def create_app(test_config=None):
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
         # Seed the demo coach account + sample posts on an empty DB. Turn off outside local dev.
         SEED_DEMO_ACCOUNTS=os.environ.get("SWIMMATCH_SEED_DEMO", "1") == "1",
+        # Failed-login throttle: this many failures per IP + email within the window -> 429.
+        LOGIN_MAX_FAILURES=int(os.environ.get("SWIMMATCH_LOGIN_MAX_FAILURES", "5")),
+        LOGIN_WINDOW_SECONDS=int(os.environ.get("SWIMMATCH_LOGIN_WINDOW_SECONDS", "900")),
     )
     if test_config:
         app.config.update(test_config)
