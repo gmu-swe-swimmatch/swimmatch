@@ -1,13 +1,18 @@
 """Coach recruiting posts: public browse/view, coach-only create/edit/delete."""
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user
-from sqlalchemy import select
 
 from backend.models import Post, db
 from backend.models.post import COURSES
 from backend.routes.schools import DIVISIONS
 from backend.security import coach_required
-from backend.services.posts import create_post
+from backend.services.posts import (
+    available_grad_years,
+    count_active_filters,
+    create_post,
+    parse_post_filters,
+    search_posts,
+)
 from backend.validation import grad_year_choices, validate_post
 
 posts_bp = Blueprint("posts", __name__, url_prefix="/posts")
@@ -53,43 +58,23 @@ def _apply(post, data):
     post.target_times = data["target_times"]
 
 
-def _post_filters():
-    """Read ?division=&course=&grad_year= from the URL. Unknown values are ignored (treated as "All")."""
-    division = request.args.get("division", "").strip()
-    course = request.args.get("course", "").strip().upper()
-    grad_year = request.args.get("grad_year", "").strip()
-    return {
-        "division": division if division in DIVISIONS else "",
-        "course": course if course in COURSES else "",
-        "grad_year": int(grad_year) if grad_year.isdigit() else None,
-    }
-
-
 @posts_bp.get("/")
 def list_posts():
+    """Browse page: read the filters from the URL, let the service find the posts, render them."""
     # TODO: filtering by event and bookmarking are out of scope for this build.
-    filters = _post_filters()
-    stmt = select(Post).order_by(Post.created_at.desc(), Post.id.desc())
-    if filters["division"]:
-        stmt = stmt.where(Post.division == filters["division"])
-    if filters["course"]:
-        stmt = stmt.where(Post.course == filters["course"])
-    if filters["grad_year"] is not None:
-        stmt = stmt.where(Post.grad_year == filters["grad_year"])
-    posts = db.session.execute(stmt).scalars().all()
-
-    # Offer only grad years that some post actually uses, so no option leads to an empty list.
-    grad_years = db.session.execute(select(Post.grad_year).distinct().order_by(Post.grad_year)).scalars().all()
-    active_filters = sum(1 for value in filters.values() if value)
-
+    filters = parse_post_filters(
+        division=request.args.get("division", ""),
+        course=request.args.get("course", ""),
+        grad_year=request.args.get("grad_year", ""),
+    )
     return render_template(
         "posts/list.html",
-        posts=posts,
+        posts=search_posts(filters),
         filters=filters,
-        active_filters=active_filters,
+        active_filters=count_active_filters(filters),
         divisions=DIVISIONS,
         courses=COURSES,
-        grad_years=grad_years,
+        grad_years=available_grad_years(),
     )
 
 
