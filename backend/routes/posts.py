@@ -7,6 +7,7 @@ from backend.models import Post, db
 from backend.models.post import COURSES
 from backend.routes.schools import DIVISIONS
 from backend.security import coach_required
+from backend.services.posts import create_post
 from backend.validation import grad_year_choices, validate_post
 
 posts_bp = Blueprint("posts", __name__, url_prefix="/posts")
@@ -104,12 +105,8 @@ def new_post():
     values, errors = {}, {}
     if request.method == "POST":
         values = request.form
-        data, errors = validate_post(request.form)
+        post, errors = create_post(current_user.id, request.form)
         if not errors:
-            post = Post(coach_id=current_user.id)
-            _apply(post, data)
-            db.session.add(post)
-            db.session.commit()
             flash("Your post is live.", "success")
             return redirect(url_for("posts.view_post", post_id=post.id))
     return render_template(
