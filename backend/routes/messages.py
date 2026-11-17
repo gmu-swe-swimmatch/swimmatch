@@ -84,7 +84,7 @@ def thread(conversation_id):
         if not errors:
             return redirect(url_for("messages.thread", conversation_id=conversation.id) + "#latest")
 
-    # Opening the thread counts as reading the other person's messages.
+    # Opening the thread counts as reading a message
     mark_read(conversation, current_user)
     return render_template(
         "messages/thread.html",

@@ -33,8 +33,7 @@ class Post(db.Model):
     updated_at = db.Column(db.DateTime(timezone=True), onupdate=_utcnow)  # set only when edited
 
     coach = db.relationship("User", back_populates="posts")
-    # No delete cascade on purpose: deleting a post sets conversations.post_id to NULL so
-    # swimmers and coaches keep their message history.
+    # swimmers and coaches keep message history
     conversations = db.relationship("Conversation", back_populates="post")
 
     def event_rows(self):
