@@ -26,6 +26,9 @@
         <a href="{{ url_for('posts.list_posts') }}" class="{{ 'is-active' if request.endpoint in ('posts.list_posts', 'posts.view_post') }}">Recruiting posts</a>
         <a href="{{ url_for('pages.schools') }}" class="{{ 'is-active' if request.endpoint in ('pages.schools', 'pages.school_detail') }}">Find programs</a>
         {% if current_user.is_authenticated %}
+          <a href="{{ url_for('messages.inbox') }}" class="{{ 'is-active' if request.endpoint and request.endpoint.startswith('messages.') }}">
+            Messages{% if unread_messages %} <span class="nav-badge" aria-label="{{ unread_messages }} unread">{{ unread_messages }}</span>{% endif %}
+          </a>
           {% if current_user.is_coach %}
             <a href="{{ url_for('posts.new_post') }}" class="btn btn-accent btn-sm">+ New post</a>
           {% else %}

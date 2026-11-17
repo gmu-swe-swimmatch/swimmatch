@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Conversation with {{ other.name }}{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <a class="back-link" href="{{ url_for('messages.inbox') }}">&larr; All messages</a>
+    <h1>{{ other.name }}</h1>
+    <p class="lead">
+      {{ 'Swimmer' if other.is_swimmer else 'Coach' }} ·
+      {% if conversation.post %}
+        Re: <a class="link-light" href="{{ url_for('posts.view_post', post_id=conversation.post.id) }}">{{ conversation.subject }}</a>
+      {% else %}
+        Re: {{ conversation.subject }} <small>(post removed)</small>
+      {% endif %}
+    </p>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container narrow">
+    <div class="card">
+      <ol class="message-list">
+        {% for message in conversation.messages %}
+          {% set mine = message.sender_id == current_user.id %}
+          <li class="bubble {{ 'bubble--mine' if mine else 'bubble--theirs' }}" {% if loop.last %}id="latest"{% endif %}>
+            <div class="bubble__meta">
+              <strong>{{ 'You' if mine else message.sender.name }}</strong>
+              <span>{{ message.created_at.strftime('%b %d, %Y · %I:%M %p') }} UTC</span>
+            </div>
+            <div class="bubble__body">{{ message.body }}</div>
+          </li>
+        {% endfor %}
+      </ol>
+
+      <form class="message-form message-form--reply" method="post"
+            action="{{ url_for('messages.thread', conversation_id=conversation.id) }}" novalidate>
+        {{ csrf_field() }}
+        {% if errors %}
+          <div class="form-alert" role="alert">
+            <ul>{% for msg in errors.values() %}<li>{{ msg }}</li>{% endfor %}</ul>
+          </div>
+        {% endif %}
+        <label class="{{ 'has-error' if errors.get('body') }}">Reply to {{ other.name }}
+          <textarea name="body" rows="4" maxlength="{{ max_length }}" required>{{ values.get('body', '') }}</textarea>
+        </label>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-accent">Send reply</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

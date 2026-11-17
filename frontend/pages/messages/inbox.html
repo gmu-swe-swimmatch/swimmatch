@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Messages{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <p class="eyebrow eyebrow--light">Messages</p>
+    <h1>Your conversations</h1>
+    <p class="lead">
+      {% if current_user.is_coach %}
+        Questions swimmers have sent about your recruiting posts.
+      {% else %}
+        Messages you've sent to coaches about their recruiting posts, and their replies.
+      {% endif %}
+    </p>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container narrow">
+    {% if conversations %}
+      <ul class="convo-list">
+        {% for convo in conversations %}
+          {% set other = convo.other_user(current_user) %}
+          {% set last = convo.last_message() %}
+          {% set unread = convo.unread_count_for(current_user) %}
+          <li>
+            <a class="card convo-row {{ 'is-unread' if unread }}" href="{{ url_for('messages.thread', conversation_id=convo.id) }}">
+              <div class="convo-row__top">
+                <strong class="convo-row__name">{{ other.name }}</strong>
+                <span class="meta">{{ convo.last_message_at.strftime('%b %d, %Y') }}</span>
+              </div>
+              <p class="convo-row__subject">
+                Re: {{ convo.subject }}
+                {% if unread %}<span class="pill pill--accent">{{ unread }} new</span>{% endif %}
+              </p>
+              {% if last %}
+                <p class="convo-row__preview">
+                  {% if last.sender_id == current_user.id %}You: {% endif %}{{ last.body|truncate(120) }}
+                </p>
+              {% endif %}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="card empty-state">
+        <h2>No messages yet</h2>
+        {% if current_user.is_coach %}
+          <p>When a swimmer messages you about one of your posts, it'll show up here.</p>
+          <a class="btn btn-primary" href="{{ url_for('posts.list_posts') }}">View recruiting posts</a>
+        {% else %}
+          <p>Find a recruiting post that fits you and use "Message coach" to ask a question.</p>
+          <a class="btn btn-primary" href="{{ url_for('posts.list_posts') }}">Browse recruiting posts</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Message {{ post.coach.name }}{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <a class="back-link" href="{{ url_for('posts.view_post', post_id=post.id) }}">&larr; Back to post</a>
+    <p class="eyebrow eyebrow--light">New message</p>
+    <h1>Message {{ post.coach.name }}</h1>
+    <p class="lead">About: {{ post.program_name }} · {{ post.division }} · Class of {{ post.grad_year }}</p>
+  </div>
+</section>
+
+<section class="section section--tight">
+  <div class="container narrow">
+    <form class="card message-form" method="post" action="{{ url_for('messages.new_message', post_id=post.id) }}" novalidate>
+      {{ csrf_field() }}
+
+      {% if errors %}
+        <div class="form-alert" role="alert">
+          <strong>Your message wasn't sent.</strong>
+          <ul>{% for msg in errors.values() %}<li>{{ msg }}</li>{% endfor %}</ul>
+        </div>
+      {% endif %}
+
+      <label class="{{ 'has-error' if errors.get('body') }}">Your message
+        <textarea name="body" rows="7" maxlength="{{ max_length }}" required
+                  placeholder="Introduce yourself, share your best times, and ask about the program.">{{ values.get('body', '') }}</textarea>
+        <span class="hint">Only you and {{ post.coach.name }} can see this conversation. Up to {{ max_length }} characters.</span>
+      </label>
+
+      <div class="form-actions">
+        <a class="btn btn-outline" href="{{ url_for('posts.view_post', post_id=post.id) }}">Cancel</a>
+        <button type="submit" class="btn btn-accent">Send message</button>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

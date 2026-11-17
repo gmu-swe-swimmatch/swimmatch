@@ -31,6 +31,7 @@ EVENT_TIME_BOUNDS = {
 SCY_ONLY_EVENTS = {"500_FREE"}
 
 POST_LIMITS = {"program_name": 160, "message": 4000}
+MESSAGE_MAX_LENGTH = 2000
 
 
 def parse_swim_time(text):
@@ -154,3 +155,14 @@ def validate_post(form):
     data["recruiting_events"] = selected
     data["target_times"] = target_times
     return data, errors
+
+
+def validate_message(form):
+    """Validate a chat message. Returns (clean_data, errors)."""
+    errors = {}
+    body = (form.get("body") or "").strip()
+    if not body:
+        errors["body"] = "Write a message before sending."
+    elif len(body) > MESSAGE_MAX_LENGTH:
+        errors["body"] = f"Messages must be {MESSAGE_MAX_LENGTH} characters or fewer."
+    return {"body": body}, errors
