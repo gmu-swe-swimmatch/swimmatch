@@ -6,6 +6,7 @@ from backend.models import Post, db
 from backend.models.post import COURSES
 from backend.routes.schools import DIVISIONS
 from backend.security import coach_required
+from backend.services.messages import find_conversation
 from backend.services.posts import (
     available_grad_years,
     count_active_filters,
@@ -81,7 +82,11 @@ def list_posts():
 @posts_bp.get("/<int:post_id>")
 def view_post(post_id):
     post = db.get_or_404(Post, post_id)
-    return render_template("posts/detail.html", post=post)
+    # If this swimmer already messaged the coach about this post, link to that thread.
+    conversation = None
+    if current_user.is_authenticated and current_user.is_swimmer:
+        conversation = find_conversation(current_user.id, post.id)
+    return render_template("posts/detail.html", post=post, conversation=conversation)
 
 
 @posts_bp.route("/new", methods=["GET", "POST"])

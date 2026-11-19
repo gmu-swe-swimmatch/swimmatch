@@ -67,6 +67,20 @@ Set `SWIMMATCH_SEED_DEMO=0` for any shared or deployed environment. Create a swi
 Visitors who hit a coach-only route are sent to the login page. A logged-in swimmer, or a coach
 who doesn't own the post, gets **403 Forbidden**.
 
+### Messaging (Feature 1C)
+
+| Method   | Path                        | Access                         | Purpose                                    |
+|----------|-----------------------------|--------------------------------|--------------------------------------------|
+| GET      | `/messages/`                | logged in                      | Inbox: your conversations, newest first    |
+| GET/POST | `/messages/new/<post_id>`   | swimmer                        | Message the coach who made a post          |
+| GET/POST | `/messages/<id>`            | the swimmer and coach in it    | View a conversation and reply              |
+
+Swimmers start conversations from a post's "Message coach" button. Each swimmer gets one
+conversation per post, so contacting the same post again reopens that thread. Coaches read and
+reply from their inbox. Opening a thread marks the other person's messages as read, and the nav
+shows an unread count. Anyone else who opens a conversation gets **403**, and visitors are sent
+to the login page. If a coach deletes a post, its conversations stay (marked "post removed").
+
 ### Existing scaffold (unchanged)
 
 `/` (landing), `/profile`, `/schools`, `/schools/<id>`, `/athlete/api/<id>`,
@@ -100,21 +114,25 @@ backend/
     __init__.py         # db instance + canonical EVENTS list
     user.py             # User (coach | swimmer), password hashing
     post.py             # Post: coach recruiting post (events/target times as JSON)
+    message.py          # Conversation + Message (swimmer <-> coach messaging)
     swimmer.py          # Swimmer + SwimmerEventTime (one row per event)
     school.py           # School + SchoolEventStandard (recruit / walk-on per event)
   routes/
     auth.py             # /register, /login, /logout
     posts.py            # /posts/... browse, view, create, edit, delete
+    messages.py         # /messages/... inbox, new message, conversation thread + reply
     pages.py            # HTML pages: /, /profile, /schools, /schools/<id>
     athlete.py          # swimmer profile CRUD (stubbed)
     schools.py          # search, match-score stub, JSON API under /api/schools
   services/
     __init__.py         # service layer package
     posts.py            # business logic for creating recruiting posts
+    messages.py         # business logic for conversations, replies, unread counts
 frontend/
   pages/                # Jinja templates (base layout, pages, partials)
     auth/               # login, register
     posts/              # list, detail, form, _post_card
+    messages/           # inbox, new, thread
   static/css/main.css   # design system: navy + teal, Syne / Lora
   static/js/main.js     # mobile nav, flash dismiss, filter auto-submit, delete confirm
 ```
@@ -126,12 +144,16 @@ frontend/
   event codes), target_times (JSON `{event: seconds}`), course (`SCY`/`LCM`), grad_year, message,
   created_at, updated_at. JSON columns are used because a post's events are always read and
   written together with the post. Move them to a related table if posts ever need to be filtered by event.
+- `conversations`: id, swimmer_id → users.id, coach_id → users.id, post_id → posts.id (nullable,
+  set to NULL if the post is deleted), subject (program name copy), created_at, last_message_at.
+  Unique on (swimmer_id, post_id).
+- `messages`: id, conversation_id → conversations.id, sender_id → users.id, body, created_at,
+  read_at (NULL until the recipient opens the thread).
 - Swimmer times and school standards use related tables (`swimmer_event_times`,
   `school_event_standards`), so matching can join on `event`. All times are stored as seconds (float).
 
 ## Next steps / out of scope for now
 
-- Messaging and replies between swimmers and coaches (the "Contact coach" button is disabled)
 - Swimmer stats profiles tied to accounts
 - Filtering by event and bookmarking posts
 - Multi-event match scoring in `compute_match_score`; wire up the profile form

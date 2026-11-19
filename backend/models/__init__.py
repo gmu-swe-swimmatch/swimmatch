@@ -22,10 +22,13 @@ from backend.models.school import School, SchoolEventStandard  # noqa: E402
 from backend.models.swimmer import Swimmer, SwimmerEventTime  # noqa: E402
 from backend.models.user import User  # noqa: E402
 from backend.models.post import Post  # noqa: E402
+from backend.models.message import Conversation, Message  # noqa: E402
 
 __all__ = [
     "User",
     "Post",
+    "Conversation",
+    "Message",
     "db",
     "EVENTS",
     "EVENT_LABELS",

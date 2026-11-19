@@ -54,8 +54,19 @@
             <div><dt>Updated</dt><dd>{{ post.updated_at.strftime('%b %d, %Y') }}</dd></div>
           {% endif %}
         </dl>
-        {# TODO: messaging/replies between swimmers and coaches is out of scope for this build. #}
-        <button class="btn btn-accent btn-block" type="button" disabled>Contact coach · coming soon</button>
+        {% if not current_user.is_authenticated %}
+          <a class="btn btn-accent btn-block" href="{{ url_for('messages.new_message', post_id=post.id) }}">Log in to message coach</a>
+        {% elif current_user.is_swimmer %}
+          {% if conversation %}
+            <a class="btn btn-accent btn-block" href="{{ url_for('messages.thread', conversation_id=conversation.id) }}">View your conversation</a>
+          {% else %}
+            <a class="btn btn-accent btn-block" href="{{ url_for('messages.new_message', post_id=post.id) }}">Message coach</a>
+          {% endif %}
+        {% elif post.is_owned_by(current_user) %}
+          <a class="btn btn-outline btn-block" href="{{ url_for('messages.inbox') }}">See swimmer messages</a>
+        {% else %}
+          <p class="hint">Only swimmers can message coaches about posts.</p>
+        {% endif %}
       </div>
 
       {% if post.is_owned_by(current_user) %}
